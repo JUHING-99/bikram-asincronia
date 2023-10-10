@@ -5,7 +5,9 @@
 function getAllBreeds(){
     return fetch("https://dog.ceo/api/breeds/list/all")
             .then(res=>res.json())
-            .then(breeds => Object.keys(breeds.message)); 
+            .then(breeds => {
+                console.log(Object.keys(breeds.message))
+                return Object.keys(breeds.message)}); 
 };
 
 
@@ -55,10 +57,31 @@ function printGithubUserProfile(username) {
                     nombre.innerHTML = usuario.name;
                     document.querySelector("body").appendChild(imagen);
                     document.querySelector("body").appendChild(nombre);
-                    console.log(usuario.avatar_url);
                     return {img: {src: usuario.avatar_url}, name: usuario.name}
                 })
     } catch (error){
         console.error('Error:', error);
     };
 };
+
+
+//7 - Crea una función getAndPrintGitHubUserProfile(username) que contenga una petición a la API para obtener información de ese usuario y devuelva un string que represente una tarjeta HTML como en el ejemplo, la estructura debe ser exactamente la misma
+
+function getAndPrintGitHubUserProfile(username){
+    return fetch(`https://api.github.com/users/${username}`)
+                .then(res=> res.json())
+                .then((usuario)=> {
+                    let img = usuario.avatar_url;
+                    let name = usuario.name;
+                    let num = usuario.public_repos
+
+                  return  `<section>
+                                <img src="${img}" alt="${name}">
+                                <h1>${name}</h1>
+                                <p>Public repos: ${num}</p>
+                            </section>`
+
+});
+};
+
+
