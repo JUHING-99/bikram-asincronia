@@ -29,19 +29,31 @@ let randomizeArrayOrder = (array) => {
     return (array);
 }
 
-async function getNumberOfBreeds (){
+
+
+async function getNumberOfBreeds() {
     return await fetch('https://dog.ceo/api/breeds/list/all')
-    .then(res=>res.json())
-    .then(json=>console.log(json.message.length));
-}
+        .then(res => res.json())
+        .then(json => {
+            console.log("**", Object.keys(json.message).length)
+            return Object.keys(json.message).length
+        });
+};
+
+
+async function getUserReposNumber() {
+    return await fetch('https://api.github.com/users/alenriquez96')
+        .then(res => res.json())
+        .then(json => json.public_repos)
+};
 
 
 describe('Ejercicios asincronía', function () {
 
-
     describe('Ejercicio 1.- Declara una funcion getAllBreeds que devuelva todas las razas de perro', function () {
         it('La función devuelve todas las razas de perro', async function () {
-            expect((await getAllBreeds()).length).toEqual(await getNumberOfBreeds());
+            const breedLength = await getNumberOfBreeds();
+            expect(Object.keys(await getAllBreeds()).length).toBe(breedLength);
             expect(await getAllBreeds()).toContain('affenpinscher', 'african', 'airedale', 'akita', 'appenzeller', 'australian', 'basenji', 'beagle', 'bluetick', 'borzoi', 'bouvier', 'boxer', 'brabancon', 'briard', 'buhund', 'bulldog', 'bullterrier', 'cattledog', 'chihuahua', 'chow', 'clumber', 'cockapoo', 'collie', 'coonhound', 'corgi', 'cotondetulear', 'dachshund', 'dalmatian', 'dane', 'deerhound', 'dhole', 'dingo', 'doberman', 'elkhound', 'entlebucher', 'eskimo', 'finnish', 'frise', 'germanshepherd', 'greyhound', 'groenendael', 'havanese', 'hound', 'husky', 'keeshond', 'kelpie', 'komondor', 'kuvasz', 'labradoodle', 'labrador', 'leonberg', 'lhasa', 'malamute', 'malinois', 'maltese', 'mastiff', 'mexicanhairless', 'mix', 'mountain', 'newfoundland', 'otterhound', 'ovcharka', 'papillon', 'pekinese', 'pembroke', 'pinscher', 'pitbull', 'pointer', 'pomeranian', 'poodle', 'pug', 'puggle', 'pyrenees', 'redbone', 'retriever', 'ridgeback', 'rottweiler', 'saluki', 'samoyed', 'schipperke', 'schnauzer', 'segugio', 'setter', 'sharpei', 'sheepdog', 'shiba', 'shihtzu', 'spaniel', 'spitz', 'springer', 'stbernard', 'terrier', 'tervuren', 'vizsla', 'waterdog', 'weimaraner', 'whippet', 'wolfhound')
         })
     })
@@ -75,16 +87,17 @@ describe('API gitHub', function () {
 
     it('Ejercicio 6.- La función pinta la info del usuario', async function () {
         const response = await printGithubUserProfile('alenriquez96');
-        expect(response.img.src).toContain('https://avatars.githubusercontent.com/u/');
+        expect(response.img).toContain('https://avatars.githubusercontent.com/u/');
         expect(response.name).toEqual('Alberto Enríquez');
     });
 
     it('Ejercicio 7.- La función devuelve una tarjeta con la info del usuario ', async function () {
         const response = await getAndPrintGitHubUserProfile('alenriquez96');
+        const publicRepos = await getUserReposNumber();
         expect(response).toContain(`<section>`)
         expect(response).toContain(`<img src="https://avatars.githubusercontent.com/u/98609901?v=4" alt="Alberto Enríquez">`)
         expect(response).toContain(`<h1>Alberto Enríquez</h1>`)
-        expect(response).toContain(`<p>Public repos: 59</p>`)
+        expect(response).toContain(`<p>Public repos: ${publicRepos}</p>`)
     })
 })
 
