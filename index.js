@@ -58,7 +58,7 @@ function printGithubUserProfile(username) {
                 nombre.innerHTML = usuario.name;
                 document.querySelector("body").appendChild(imagen);
                 document.querySelector("body").appendChild(nombre);
-                return { img: { src: usuario.avatar_url }, name: usuario.name }
+                return { img: usuario.avatar_url , name: usuario.name }
             })
     } catch (error) {
         console.error('Error:', error);
@@ -87,15 +87,45 @@ function getAndPrintGitHubUserProfile(username) {
 
 
 // 8.- Manipulación del DOM: Crea un input de tipo texto, y un botón buscar. El usuario escribirá en el input el nombre de usuario de GitHub que quiera buscar. Después llamaremos a la función getAndPrintGitHubUserProfile(username) que se ejecute cuando se pulse el botón buscar.(Esto no se testea).
-let buscador =
-`<input type= "text name="username" value="username">
-<button type="submit"><i class="fa fa-search"></i></button>
-`
+document.addEventListener("DOMContentLoaded", function() {     //Cuando se carga el contneido de la página se ejecuta esta función
+    let buscador = document.createElement("form");       //Creamos un elemento "form" que contiene el template string (este cachito lo tenía hecho, pero no sabía como introducirlo en la función y que se pinte en la página!)
+    buscador.id = "buscador";
+    buscador.innerHTML = `<label for="nombre">Write the name you want to search</label>
+                            <input type="text" id="nombre" name="nombre"placeholder="Name"><br>
+                            <button type="submit">Submit</button>`;
+    document.querySelector("body").appendChild(buscador);    //se lo pegamos al body
 
-document.querySelector("body").appendChild(buscador)
+    document.getElementById("buscador").addEventListener("submit", function(event) {   //una validación de formulario
+        event.preventDefault();
+        let user = event.target.nombre.value;  //el nombre del input
+        let info = getAndPrintGitHubUserProfile(user);   //se llama a la función anterior poniendole como parámetro el usuario que quiere buscar el cliente y ha introducido en el input.
+        let article = document.createElement("article");  
+
+        info.then(resultado => article.innerHTML = resultado); //después se aplica la información obtenida de llamar a la funcion y se introduce dentro del "article" creado previamente
+        document.querySelector("body").appendChild(article);
+    });
+});
 
 
-function fetchGithubUsers(userNames){
-    return fetch('https://api.github.com/users/${name}')
-    .then(res => res.json())
+//9
+function fetchGithubUsers(userNames) {
+    //Se crea una variable usuarios y a ella le asignamos como valor toda una callback function. En esta callback hacemos un map a todos los parámetros introducidos en la función. Este map llama a la api y devuelve un objeto con el nombre y la url del repositorio del usuario. Es decir que la variable "usuarios" al final contiene esos objetos.
+    let usuarios = userNames.map(user => fetch(`https://api.github.com/users/${user}`) 
+                                                        .then(res => res.json())
+                                                        .then(usuario => {
+                                                            let repo = usuario.html_url;
+                                                            let nombre = usuario.name;
+                                                            return {name: nombre, html_url: repo};
+                                                        }));
+
+    //Promise.all : Crea una promesa que se cumple en formato de que te devuelve un array de los resultados cuando todas las promesas del fetch se cumplen, pero si alguna de esas promesas es rechazada, se rechaza todo. Así que cuando todas las promesas del fetch se cumplen te devuelve un array con los usuarios (que on objetos). A esos usuarios se les pasa un bucle for y se introduce en un template string con esa estructura.
+    return Promise.all(usuarios).then(users => {
+        for (let i = 0; i < users.length; i++) {
+            let section = document.createElement("section")
+            section.innerHTML = `<h1>Name: ${users[i].name}</h1>
+                                <p>Repo: ${users[i].html_url}</p>`;
+            document.querySelector("body").appendChild(section);
+        }
+        return users;
+    });                                                        
 }
